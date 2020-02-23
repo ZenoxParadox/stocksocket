@@ -1,0 +1,82 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "7144478717672b6719f8e8b19d8717cb",
+    "entities": [
+      {
+        "tableName": "Product",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`securityId` TEXT NOT NULL, `symbol` TEXT NOT NULL, `displayName` TEXT NOT NULL, `current_currency` TEXT, `current_decimals` INTEGER, `current_amount` REAL, `closing_currency` TEXT, `closing_decimals` INTEGER, `closing_amount` REAL, PRIMARY KEY(`securityId`))",
+        "fields": [
+          {
+            "fieldPath": "securityId",
+            "columnName": "securityId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "symbol",
+            "columnName": "symbol",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "displayName",
+            "columnName": "displayName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentPrice.currency",
+            "columnName": "current_currency",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "currentPrice.decimals",
+            "columnName": "current_decimals",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "currentPrice.amount",
+            "columnName": "current_amount",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "closingPrice.currency",
+            "columnName": "closing_currency",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "closingPrice.decimals",
+            "columnName": "closing_decimals",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "closingPrice.amount",
+            "columnName": "closing_amount",
+            "affinity": "REAL",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "securityId"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7144478717672b6719f8e8b19d8717cb')"
+    ]
+  }
+}

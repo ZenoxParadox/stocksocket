@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<transitionSet xmlns:android="http://schemas.android.com/apk/res/android"
+    android:transitionOrdering="together">
+
+    <targets>
+        <target android:excludeId="@android:id/statusBarBackground" />
+        <target android:excludeId="@android:id/navigationBarBackground" />
+
+        <target android:excludeId="@id/toolbar" />
+    </targets>
+
+    <slide
+        android:duration="@android:integer/config_mediumAnimTime"
+        android:interpolator="@android:interpolator/anticipate"
+        android:slideEdge="left" />
+
+</transitionSet>

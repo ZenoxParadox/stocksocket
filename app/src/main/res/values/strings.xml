@@ -1,0 +1,10 @@
+<resources>
+    <string name="name">Bux assignment</string>
+
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="neutral_price">0.00%</string>
+
+    <string name="poor_connection">Poor connection, check your internet</string>
+
+</resources>

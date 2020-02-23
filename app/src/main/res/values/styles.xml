@@ -1,0 +1,18 @@
+<resources>
+
+
+    <style name="header">
+        <item name="android:textSize">@dimen/text_normal</item>
+    </style>
+
+    <style name="subheader">
+        <item name="android:textSize">@dimen/text_small</item>
+        <item name="android:textColor">@color/pinkish_gray</item>
+    </style>
+
+    <style name="currentPrice">
+        <item name="android:textSize">@dimen/text_currentPrice</item>
+        <item name="android:textColor">@color/urban_blue</item>
+    </style>
+
+</resources>

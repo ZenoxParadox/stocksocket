@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- theme-->
+    <color name="colorPrimary">@color/urban_blue</color>
+    <color name="colorPrimaryDark">@color/urban_blue_darkest</color>
+    <color name="colorAccent">@color/mellow_yellow</color>
+
+    <!-- app -->
+    <color name="king_red">#fffb4c43</color>
+    <color name="jazz_green">#ff09d960</color>
+    <color name="urban_blue">#3191e9</color>
+    <color name="urban_blue_darkest">#ff0664ad</color>
+    <color name="mellow_yellow">#ffffdd00</color>
+
+    <color name="soft_gray">#ffecebe8</color>
+    <color name="pinkish_gray">#ffbbb9b9</color>
+    <color name="scorpion_gray">#ff575757</color>
+
+</resources>
