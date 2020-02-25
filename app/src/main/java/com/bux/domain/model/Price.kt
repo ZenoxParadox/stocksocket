@@ -5,8 +5,6 @@ import java.util.*
 
 /**
  * TODO: check Currency codes are in the ISO 4217 format
- *
- * Created by Zenox on 20-2-2020 at 12:32.
  */
 data class Price(
 

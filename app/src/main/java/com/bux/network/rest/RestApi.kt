@@ -1,5 +1,6 @@
-package com.bux.network
+package com.bux.network.rest
 
+import com.bux.BuildConfig
 import com.bux.domain.model.Product
 import io.reactivex.Single
 import retrofit2.http.GET
@@ -23,17 +24,14 @@ TODO remove
   "cid": "8473622939"
 }
  */
-const val TOKEN_REST = "eyJhbGciOiJIUzI1NiJ9.eyJyZWZyZXNoYWJsZSI6ZmFsc2UsInN1YiI6ImJiMGNkYTJiLWExMGUtNGVkMy1hZDVhLTBmODJiNGMxNTJjNCIsImF1ZCI6ImJldGEuZ2V0YnV4LmNvbSIsInNjcCI6WyJhcHA6bG9naW4iLCJydGY6bG9naW4iXSwiZXhwIjoxODIwODQ5Mjc5LCJpYXQiOjE1MDU0ODkyNzksImp0aSI6ImI3MzlmYjgwLTM1NzUtNGIwMS04NzUxLTMzZDFhNGRjOGY5MiIsImNpZCI6Ijg0NzM2MjI5MzkifQ.M5oANIi2nBtSfIfhyUMqJnex-JYg6Sm92KPYaUL9GKg"
 
 /**
  * TODO Describe class functionality.
- *
- * Created by Zenox on 20-2-2020 at 12:13.
  */
-interface Api {
+interface RestApi {
 
     @Headers(
-        "Authorization: Bearer $TOKEN_REST",
+        "Authorization: Bearer ${BuildConfig.TOKEN_REST}",
         "Accept: application/json",
         "Accept-Language: nl-NL,en;q=0.8"
     )

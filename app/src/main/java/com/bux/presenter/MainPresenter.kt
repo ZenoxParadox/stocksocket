@@ -1,15 +1,14 @@
 package com.bux.presenter
 
+import android.os.Bundle
 import com.bux.domain.model.Product
-import com.bux.presenter.contract.MainContract
 import com.bux.network.repository.ProductRepository
+import com.bux.presenter.contract.MainContract
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 
 /**
  * TODO Describe class functionality.
- *
- * Created by Zenox on 21-2-2020 at 20:55.
  */
 class MainPresenter(private val view: MainContract.View) : MainContract.Presenter {
 
@@ -17,7 +16,7 @@ class MainPresenter(private val view: MainContract.View) : MainContract.Presente
 
     private val disposables = CompositeDisposable()
 
-    override fun start() {
+    override fun start(bundle: Bundle?) {
         disposables.add(repo.getAll().observeOn(AndroidSchedulers.mainThread()).subscribe { items ->
             view.showList(items)
         })

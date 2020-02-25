@@ -47,27 +47,13 @@ class DetailActivity : BaseActivity(), KoinComponent, DetailContract.View {
         tvPercentage = findViewById(R.id.activity_detail_percentage)
         ivArrow = findViewById(R.id.activity_detail_arrow)
 
-        setConnectionAware()
-
         setPresenter(DetailPresenter(this))
-
-        // TODO view binding
     }
 
     override fun setPresenter(presenter: DetailContract.Presenter) {
         this.presenter = presenter as DetailPresenter
-        this.presenter.start()
-
-//        val id = intent.getStringExtra(SECURITY_ID)
-//        this.presenter.requestUpdates(id)
     }
 
-    override fun onConnection() {
-        this.presenter.start()
-
-        val id = intent.getStringExtra(SECURITY_ID)
-        this.presenter.requestUpdates(id)
-    }
 
     override fun setDisplayName(name: String) {
         toolbar.title = name
@@ -129,10 +115,11 @@ class DetailActivity : BaseActivity(), KoinComponent, DetailContract.View {
     override fun onResume() {
         super.onResume()
 
-        this.presenter.start()
-
         val id = intent.getStringExtra(SECURITY_ID)
-        presenter.requestUpdates(id)
+
+        val bundle = Bundle()
+        bundle.putString(SECURITY_ID, id)
+        this.presenter.start(bundle)
     }
 
 }

@@ -2,7 +2,7 @@ package com.bux.network.repository
 
 import com.bux.domain.dao.ProductDao
 import com.bux.domain.model.Product
-import com.bux.network.Api
+import com.bux.network.rest.RestApi
 import com.bux.util.Logger
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
@@ -12,21 +12,14 @@ import java.net.ConnectException
 
 /**
  * TODO Describe class functionality.
- *
- * Created by Zenox on 20-2-2020 at 15:58.
  */
 class ProductRepository : KoinComponent {
 
     private val LOG_TAG = this::class.java.simpleName
 
-    private val api: Api by inject()
+    private val api: RestApi by inject()
 
     private val productDao: ProductDao by inject()
-
-    // private val database: DataSource<Database> by inject() TODO <--------
-
-    // private val api: DataSource<Api> by inject() TODO <--------
-    // private val socket: DataSource<Socket> by inject() TODO <--------
 
     fun getAll(): Single<List<Product>> {
         return productDao.getAll().subscribeOn(Schedulers.io())
@@ -53,28 +46,5 @@ class ProductRepository : KoinComponent {
                 }
             }
     }
-
-//    fun getSingleFlow(id: String): Flowable<Product> {
-////        val event = SocketEvent()
-////        event.subscribe(id)
-////
-////        val data = event.toJson(gson)
-////        Logger.toString(LOG_TAG, "data", data)
-////
-////
-////        val connection = socket.openConnection(BaseSocketListener(gson, object: BaseSocketListener.Listener {
-////
-////            override fun onMessage(message: QuoteMessage) {
-////
-////                emitter.onNext(message)
-////
-////            }
-////
-////        }))
-////
-////        connection.send(data)
-//
-//        return productDao.getProduct(id).observeOn(Schedulers.io())
-//    }
 
 }

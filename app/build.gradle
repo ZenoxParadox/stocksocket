@@ -8,6 +8,14 @@ apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 28
+
+    /**
+     * Build variables
+     */
+    def API_BASE = "API_BASE"
+    def TOKEN_SOCKET = "TOKEN_SOCKET"
+    def TOKEN_REST = "TOKEN_REST"
+
     defaultConfig {
         applicationId "com.bux"
         minSdkVersion 21
@@ -21,10 +29,11 @@ android {
                 arg("room.schemaLocation", "$projectDir/schemas".toString())
             }
         }
+
+        buildConfigField 'String', TOKEN_REST, '"eyJhbGciOiJIUzI1NiJ9.eyJyZWZyZXNoYWJsZSI6ZmFsc2UsInN1YiI6ImJiMGNkYTJiLWExMGUtNGVkMy1hZDVhLTBmODJiNGMxNTJjNCIsImF1ZCI6ImJldGEuZ2V0YnV4LmNvbSIsInNjcCI6WyJhcHA6bG9naW4iLCJydGY6bG9naW4iXSwiZXhwIjoxODIwODQ5Mjc5LCJpYXQiOjE1MDU0ODkyNzksImp0aSI6ImI3MzlmYjgwLTM1NzUtNGIwMS04NzUxLTMzZDFhNGRjOGY5MiIsImNpZCI6Ijg0NzM2MjI5MzkifQ.M5oANIi2nBtSfIfhyUMqJnex-JYg6Sm92KPYaUL9GKg"'
+        buildConfigField 'String', TOKEN_SOCKET, '"eyJhbGciOiJIUzI1NiJ9.eyJyZWZyZXNoYWJsZSI6ZmFsc2UsInN1YiI6ImJiMGNkYTJiLWExMGUtNGVkMy1hZDVhLTBmODJiNGMxNTJjNCIsImF1ZCI6ImJldGEuZ2V0YnV4LmNvbSIsInNjcCI6WyJhcHA6bG9naW4iLCJydGY6bG9naW4iXSwiZXhwIjoxODIwODQ5Mjc5LCJpYXQiOjE1MDU0ODkyNzksImp0aSI6ImI3MzlmYjgwLTM1NzUtNGIwMS04NzUxLTMzZDFhNGRjOGY5MiIsImNpZCI6Ijg0NzM2MjI5MzkifQ.M5oANIi2nBtSfIfhyUMqJnex-JYg6Sm92KPYaUL9GKg"'
     }
     buildTypes {
-        def API_BASE = "API_BASE"
-
         debug {
             resValue("string", "PORT_NUMBER", "8181")
 
@@ -45,8 +54,11 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-}
 
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+    }
+}
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -71,13 +83,21 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxjava:2.2.9'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
 
-    // network
+    // rest
     implementation 'com.squareup.retrofit2:retrofit:2.7.1'
     implementation "com.squareup.retrofit2:adapter-rxjava2:2.7.1"
     implementation 'com.squareup.retrofit2:converter-gson:2.7.1'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.2.1'
 
+    // sockets
+    implementation 'com.tinder.scarlet:scarlet:0.1.10'
+    implementation 'com.tinder.scarlet:websocket-okhttp:0.1.10'
+    implementation 'com.tinder.scarlet:message-adapter-gson:0.1.10'
+    implementation 'com.tinder.scarlet:stream-adapter-rxjava2:0.1.10'
+
+    // testing
     testImplementation 'junit:junit:4.12'
+    testImplementation 'androidx.test:core:1.2.0'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'

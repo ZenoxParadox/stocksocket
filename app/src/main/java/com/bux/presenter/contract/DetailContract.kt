@@ -9,14 +9,10 @@ import com.google.android.material.snackbar.BaseTransientBottomBar.Duration
 
 /**
  * TODO Describe class functionality.
- *
- * Created by Zenox on 21-2-2020 at 20:47.
  */
 interface DetailContract {
 
     interface Presenter : BasePresenter<View> {
-
-        fun requestUpdates(securityId: String)
 
         fun setProduct(product: Product)
 

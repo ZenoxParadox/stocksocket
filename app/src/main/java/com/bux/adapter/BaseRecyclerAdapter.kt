@@ -4,9 +4,9 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.bux.util.Logger
 
-private const val LOG_TAG = "BaseRecyclerAdapter"
-
 abstract class BaseRecyclerAdapter<VH : RecyclerView.ViewHolder, T> : RecyclerView.Adapter<VH>() {
+
+    private val LOG_TAG = this::class.java.simpleName
 
     private lateinit var items: List<T>
 
@@ -16,8 +16,6 @@ abstract class BaseRecyclerAdapter<VH : RecyclerView.ViewHolder, T> : RecyclerVi
     private val observer = object : RecyclerView.AdapterDataObserver() {
         override fun onChanged() {
             super.onChanged()
-            Logger.i(LOG_TAG, "onChanged()")
-
             toggleEmptyView()
         }
     }
@@ -69,7 +67,7 @@ abstract class BaseRecyclerAdapter<VH : RecyclerView.ViewHolder, T> : RecyclerVi
         fun onItemClick(item: T, position: Int)
 
         fun onItemLongPress(item: T, position: Int) {
-            // Optional
+            throw NotImplementedError()
         }
 
     }

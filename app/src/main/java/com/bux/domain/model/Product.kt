@@ -25,7 +25,6 @@ const val PERCENTAGE_FORMAT = "%.2f%%"
 }
 
  *
- * Created by Zenox on 20-2-2020 at 12:32.
  */
 @Entity
 data class Product(

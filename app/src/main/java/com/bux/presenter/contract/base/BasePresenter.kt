@@ -1,13 +1,13 @@
 package com.bux.presenter.contract.base
 
+import android.os.Bundle
+
 /**
  * TODO Describe class functionality.
- *
- * Created by Zenox on 21-2-2020 at 20:34.
  */
 interface BasePresenter<V : BaseView<*>> {
 
-    fun start()
+    fun start(bundle: Bundle? = null)
 
     fun pause() {
         throw NotImplementedError("Called yet not implemented.")

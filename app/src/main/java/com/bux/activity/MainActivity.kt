@@ -11,7 +11,6 @@ import com.bux.adapter.ProductAdapter
 import com.bux.domain.model.Product
 import com.bux.presenter.MainPresenter
 import com.bux.presenter.contract.MainContract
-import com.bux.util.Logger
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.core.KoinComponent
 
@@ -64,8 +63,6 @@ class MainActivity : BaseActivity(), KoinComponent, MainContract.View {
     }
 
     override fun showDetail(item: Product) {
-        Logger.i(LOG_TAG, "showDetail(${item.displayName})")
-
         val options = ActivityOptionsCompat.makeSceneTransitionAnimation(this)
 
         val intent = Intent(this@MainActivity, DetailActivity::class.java)
@@ -80,10 +77,7 @@ class MainActivity : BaseActivity(), KoinComponent, MainContract.View {
 
     override fun onPause() {
         super.onPause()
-
         presenter.stop()
     }
-
-
 
 }

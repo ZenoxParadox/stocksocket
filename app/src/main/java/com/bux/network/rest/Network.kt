@@ -1,25 +1,26 @@
-package com.bux.network
+package com.bux.network.rest
 
 import com.bux.BuildConfig
-import com.google.gson.GsonBuilder
+import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.core.KoinComponent
+import org.koin.core.get
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
 /**
  * TODO Describe class functionality.
- *
- * Created by Zenox on 20-2-2020 at 12:13.
  */
-class Network {
+class Network : KoinComponent {
 
-    fun create(): Api {
-        val gson = GsonBuilder().create()
+    private val gson : Gson = get()
+
+    fun create(): RestApi {
 
         val interceptor = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = HttpLoggingInterceptor.Level.NONE
         }
         val client = OkHttpClient.Builder().addInterceptor(interceptor).build()
 
@@ -31,7 +32,7 @@ class Network {
             .client(client)
             .build()
 
-        return retrofit.create<Api>(Api::class.java)
+        return retrofit.create<RestApi>(RestApi::class.java)
     }
 
 }
