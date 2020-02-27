@@ -11,7 +11,7 @@ import org.koin.core.inject
 import java.net.ConnectException
 
 /**
- * TODO Describe class functionality.
+ * Basic [Product] repository between [RestApi] and [com.bux.domain.BuxDatabase]
  */
 class ProductRepository : KoinComponent {
 
@@ -24,8 +24,6 @@ class ProductRepository : KoinComponent {
     fun getAll(): Single<List<Product>> {
         return productDao.getAll().subscribeOn(Schedulers.io())
     }
-
-    // TODO Database -> Flowable<Product>
 
     fun getSingle(securityId: String): Single<Product> {
         return api.getProduct(securityId)

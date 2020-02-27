@@ -8,7 +8,7 @@ import com.bux.presenter.contract.base.BaseView
 import com.google.android.material.snackbar.BaseTransientBottomBar.Duration
 
 /**
- * TODO Describe class functionality.
+ * Contract between [com.bux.presenter.DetailPresenter] and [com.bux.activity.DetailActivity]
  */
 interface DetailContract {
 
@@ -20,13 +20,13 @@ interface DetailContract {
 
     interface View : BaseView<Presenter> {
 
-        // TODO
+        // Static (not updated)
 
         fun setDisplayName(name: String)
 
         fun setClosingPrice(price: String)
 
-        // TODO
+        // Dynamic
 
         fun setCurrentPrice(price: String)
 
@@ -36,7 +36,7 @@ interface DetailContract {
 
         fun setPercentage(percentage: String)
 
-        // TODO
+        // Other (meta/errors)
 
         fun setLatency(latency: String, @ColorRes color: Int)
 

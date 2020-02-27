@@ -5,7 +5,7 @@ import com.bux.presenter.contract.base.BasePresenter
 import com.bux.presenter.contract.base.BaseView
 
 /**
- * TODO Describe class functionality.
+ * Contract between [com.bux.presenter.MainPresenter] and [com.bux.activity.MainActivity]
  */
 interface MainContract {
 

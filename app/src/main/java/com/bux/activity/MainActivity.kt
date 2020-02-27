@@ -2,27 +2,25 @@ package com.bux.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import androidx.core.app.ActivityOptionsCompat
-import androidx.recyclerview.widget.RecyclerView
 import com.bux.R
 import com.bux.adapter.BaseRecyclerAdapter
 import com.bux.adapter.ProductAdapter
 import com.bux.domain.model.Product
 import com.bux.presenter.MainPresenter
 import com.bux.presenter.contract.MainContract
+import kotlinx.android.synthetic.main.activity_detail.toolbar
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.core.KoinComponent
 
 /**
- * TODO move everything out of here
+ * First activity where a list is shown to the user
  */
 class MainActivity : BaseActivity(), KoinComponent, MainContract.View {
 
     private val LOG_TAG = this::class.java.simpleName
 
     private lateinit var productAdapter: ProductAdapter
-    private lateinit var recyclerView: RecyclerView
 
     private lateinit var presenter: MainContract.Presenter
 
@@ -31,14 +29,7 @@ class MainActivity : BaseActivity(), KoinComponent, MainContract.View {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        recyclerView = findViewById(R.id.activity_main_recyclerview_products)
-        val emptyView: View = findViewById(R.id.activity_main_progress)
-
         setPresenter(MainPresenter(this))
-
-        // TODO repository
-
-        // TODO view binding
 
         productAdapter = ProductAdapter(this, object : BaseRecyclerAdapter.ClickListener<Product> {
             override fun onItemClick(item: Product, position: Int) {
@@ -46,9 +37,9 @@ class MainActivity : BaseActivity(), KoinComponent, MainContract.View {
             }
         })
 
-        productAdapter.setEmptyView(recyclerView, emptyView)
+        productAdapter.setEmptyView(activity_main_recyclerview_products, activity_main_progress)
 
-        recyclerView.apply {
+        activity_main_recyclerview_products.apply {
             adapter = productAdapter
         }
 

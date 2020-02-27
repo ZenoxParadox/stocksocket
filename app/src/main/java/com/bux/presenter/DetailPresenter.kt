@@ -7,6 +7,9 @@ import com.bux.domain.model.PERCENTAGE_FORMAT
 import com.bux.domain.model.Product
 import com.bux.network.realtime.*
 import com.bux.network.repository.ProductRepository
+import com.bux.network.rest.BuxException
+import com.bux.network.rest.ErrorType
+import com.bux.network.rest.findOrThrow
 import com.bux.presenter.contract.DetailContract
 import com.bux.util.Logger
 import com.google.android.material.snackbar.Snackbar
@@ -17,10 +20,12 @@ import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.exceptions.CompositeException
 import io.reactivex.schedulers.Schedulers
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import kotlin.math.abs
+
 
 /**
  * NOTE: I've observed that a plain [okhttp3.WebSocket] socket connection between 200-300ms on average.
@@ -30,12 +35,10 @@ const val LATENCY_OK = 1_000
 const val LATENCY_WARNING = 10_000
 
 /**
- * TODO Describe class functionality.
+ * Presenter for product detail [com.bux.activity.DetailActivity]
  */
 class DetailPresenter(private val view: DetailContract.View) : DetailContract.Presenter,
     KoinComponent {
-
-    // TODO repository
 
     private val LOG_TAG = this::class.java.simpleName
 
@@ -43,7 +46,7 @@ class DetailPresenter(private val view: DetailContract.View) : DetailContract.Pr
 
     private val gson: Gson by inject()
 
-    private val repo = ProductRepository()
+    private val repo: ProductRepository by inject()
 
     private val disposables = CompositeDisposable()
 
@@ -54,16 +57,14 @@ class DetailPresenter(private val view: DetailContract.View) : DetailContract.Pr
     override fun start(bundle: Bundle?) {
         Logger.i(LOG_TAG, "start($bundle)")
 
-        bundle?.let {
-            it.getString(SECURITY_ID)?.let { securityId ->
+        bundle?.getString(SECURITY_ID)?.let { securityId ->
+            subscriptions.subscribe(securityId)
 
-                /**
-                 *
-                 */
-                disposables.add(requestFromRest(securityId)
+            disposables.add(
+                requestFromRest(securityId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe { product ->
+                    .subscribe({ product ->
                         view.setDisplayName(product.displayName)
 
                         product.currentPrice?.let { price ->
@@ -75,32 +76,59 @@ class DetailPresenter(private val view: DetailContract.View) : DetailContract.Pr
                         }
 
                         setProduct(product)
-                    })
+                    }, { error ->
+                        Logger.e(LOG_TAG, "error: ${error.message}")
 
-                disposables.add(openSocket().subscribe { event ->
-                    Logger.i(LOG_TAG, "onEvent($event)")
+                        /**
+                         * Note: It's possible to continue throwing this to make it land in a
+                         * generic section. This is to indicate that we MIGHT want to show a user
+                         * message here based on one [com.bux.network.rest.ErrorType] or finish
+                         * the navigation stack on another (for example [com.bux.network.rest.ErrorType.EXPIRED].
+                         * Assuming we cannot refresh the token).
+                         */
+                        if (error is CompositeException) {
+                            val buxError = findOrThrow<BuxException>(error)
+                            Logger.e(LOG_TAG, "BuxError: ${buxError.hint}. (${buxError.code})")
 
-                    when (event) {
-                        is WebSocket.Event.OnConnectionOpened<*> -> {
-                            Logger.i(LOG_TAG, "socket connection opened.")
-                        }
-                        is WebSocket.Event.OnConnectionFailed -> {
-                            Logger.e(LOG_TAG, "onFailure(${event.throwable.message})")
-
-                            var message = "Error, check your connection"
-                            event.throwable.localizedMessage?.let { errorMessage ->
-                                message = errorMessage
+                            when (buxError.code) {
+                                ErrorType.EXPIRED -> {
+                                    view.setError(buxError.code.text, Snackbar.LENGTH_LONG)
+                                }
+                                else -> {
+                                    throw buxError
+                                }
                             }
 
-                            view.setError(message, Snackbar.LENGTH_LONG)
+                            return@subscribe
                         }
-                        is WebSocket.Event.OnMessageReceived -> {
-                            subscriptions.subscribe(securityId)
-                            socket.sendSubscription(subscriptions)
-                        }
+
+                        Logger.w(LOG_TAG, "Could not find out what to do.")
+                        throw error
+                    })
+            )
+
+            disposables.add(openSocket().subscribe { event ->
+                Logger.i(LOG_TAG, "onEvent($event)")
+
+                when (event) {
+                    is WebSocket.Event.OnConnectionOpened<*> -> {
+                        Logger.i(LOG_TAG, "socket connection opened.")
                     }
-                })
-            }
+                    is WebSocket.Event.OnConnectionFailed -> {
+                        Logger.e(LOG_TAG, "onFailure(${event.throwable.message})")
+
+                        var message = "Error, check your connection"
+                        event.throwable.localizedMessage?.let { errorMessage ->
+                            message = errorMessage
+                        }
+
+                        view.setError(message, Snackbar.LENGTH_LONG)
+                    }
+                    is WebSocket.Event.OnMessageReceived -> {
+                        socket.sendSubscription(subscriptions)
+                    }
+                }
+            })
         }
     }
 
@@ -110,14 +138,12 @@ class DetailPresenter(private val view: DetailContract.View) : DetailContract.Pr
 
     private fun mainStream(): Flowable<Quote> {
         return socket.mainStream()
-            //.doOnEach { Logger.toString(LOG_TAG, "main stream", it) }
             .filter { it.type == MessageType.QUOTE }
             .map { it.getQuote()!! }
     }
 
     private fun openSocket(): Flowable<WebSocket.Event> {
         return socket.eventStream()
-            //.doOnEach { Logger.toString(LOG_TAG, "event stream", it) }
             .filter filter@{ event ->
 
                 if (event is WebSocket.Event.OnConnectionOpened<*> || event is WebSocket.Event.OnConnectionFailed) {
@@ -137,18 +163,22 @@ class DetailPresenter(private val view: DetailContract.View) : DetailContract.Pr
     }
 
     override fun pause() {
-        subscriptions.unsubscribe(product.securityId)
+        if (this::product.isInitialized) {
+            subscriptions.unsubscribe(product.securityId)
+        }
+
         socket.sendSubscription(subscriptions)
     }
 
     override fun setProduct(product: Product) {
-        Logger.i(LOG_TAG, "setProduct($product)")
         this.product = product
 
         disposables.add(mainStream()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { message ->
+                this.product.currentPrice?.amount = message.currentPrice
+
                 product.currentPrice?.let { current ->
                     view.setCurrentPrice(current.asCurrency(message.currentPrice))
                 }
@@ -177,7 +207,6 @@ class DetailPresenter(private val view: DetailContract.View) : DetailContract.Pr
                 if (latency > LATENCY_WARNING) {
                     view.setError(R.string.poor_connection, Snackbar.LENGTH_SHORT)
                 }
-
             })
     }
 

@@ -4,7 +4,7 @@ import java.text.NumberFormat
 import java.util.*
 
 /**
- * TODO: check Currency codes are in the ISO 4217 format
+ * Price model for a [Product]
  */
 data class Price(
 

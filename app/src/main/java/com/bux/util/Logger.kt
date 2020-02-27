@@ -17,7 +17,6 @@ import java.util.regex.Pattern
  * v: anything from states to readable messages.
  * w: warnings that indicate strange behavior that is less desirable.
  * e: errors that should never occur and that will indicate severe complications. Optionally supply a throwable.
- *
  */
 object Logger {
 

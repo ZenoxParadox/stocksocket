@@ -8,4 +8,11 @@
     <string name="latency">Latency (in ms)</string>
     <string name="poor_connection">Poor connection, check your internet</string>
 
+    <!-- HTTP Errors -->
+    <string name="error_unexpected">Unexpected error</string>
+    <string name="error_token_invalid">Access token is invalid</string>
+    <string name="error_access_permission">Action requires additional permissions</string>
+    <string name="error_missing_auth_header">Need to be logged in</string>
+    <string name="error_session_expired">Session expired, please login</string>
+
 </resources>

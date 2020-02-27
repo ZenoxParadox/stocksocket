@@ -9,6 +9,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bux.R
 import com.bux.domain.model.Product
 
+/**
+ * Adapter for products
+ */
 class ProductAdapter(context: Context, val listener: ClickListener<Product>) :
     BaseRecyclerAdapter<ProductAdapter.Holder, Product>() {
 
@@ -28,8 +31,8 @@ class ProductAdapter(context: Context, val listener: ClickListener<Product>) :
 
     inner class Holder(view: View) : RecyclerView.ViewHolder(view) {
 
-        private val tvName = view.findViewById<TextView>(R.id.item_product_displayName)
-        private val tvCode = view.findViewById<TextView>(R.id.item_product_securityCode)
+        private val tvName:TextView = view.findViewById(R.id.item_product_displayName)
+        private val tvCode:TextView = view.findViewById(R.id.item_product_securityCode)
 
         fun bind(item: Product, position: Int) {
             itemView.setOnClickListener {

@@ -11,7 +11,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
 
 /**
- * TODO Describe class functionality.
+ * Socket for subscriptions to products.
  */
 class Socket {
 
@@ -19,7 +19,7 @@ class Socket {
 
     fun create(): SocketApi {
         val interceptor = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = HttpLoggingInterceptor.Level.NONE
         }
 
         val client = OkHttpClient.Builder()

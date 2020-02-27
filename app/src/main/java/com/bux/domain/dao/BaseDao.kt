@@ -7,8 +7,7 @@ import androidx.room.Update
 import io.reactivex.Single
 
 /**
- * TODO Describe class functionality.
- *
+ * Base data access object (DAO) for any table.
  */
 interface BaseDao<T> {
 

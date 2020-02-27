@@ -5,7 +5,8 @@ import com.google.gson.JsonElement
 import com.google.gson.annotations.SerializedName
 
 /**
- * TODO Describe class functionality.
+ * Generic BuxMessage.  Can be serialized based on the type (serialized: t) variable into
+ * either [Quote] or [Connected]
  */
 data class BuxMessage(
 

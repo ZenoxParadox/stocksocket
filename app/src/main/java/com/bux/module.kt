@@ -3,16 +3,17 @@ package com.bux
 import androidx.room.Room
 import com.bux.domain.BuxDatabase
 import com.bux.network.realtime.Socket
+import com.bux.network.repository.ProductRepository
 import com.bux.network.rest.Network
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
-const val NAME = "Bux"
+private const val NAME = "Bux"
 
 /**
- * TODO Describe class functionality.
+ * Dependency modules made by [Koin](https://insert-koin.io/)
  */
 val modules = module {
     single { Network().create() }
@@ -32,5 +33,7 @@ val modules = module {
     }
 
     single<Gson> { GsonBuilder().create() }
+
+    single { ProductRepository() }
 
 }

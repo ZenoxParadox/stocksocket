@@ -6,7 +6,12 @@ import com.tinder.scarlet.ws.Send
 import io.reactivex.Flowable
 
 /**
- * TODO Describe class functionality.
+ * Socket definition for subscribing to [com.bux.domain.model.Product] updates.
+ *
+ * 1) Open stream (+ authenticate)
+ * 2) Wait for [Connected] message
+ * 3) Subscribe using [sendSubscription]
+ * 4) Wait for updates coming from [mainStream]
  */
 interface SocketApi {
 

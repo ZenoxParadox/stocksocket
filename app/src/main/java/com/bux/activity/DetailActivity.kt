@@ -1,9 +1,6 @@
 package com.bux.activity
 
 import android.os.Bundle
-import android.view.View
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
@@ -11,26 +8,18 @@ import com.bux.R
 import com.bux.presenter.DetailPresenter
 import com.bux.presenter.contract.DetailContract
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_detail.*
+import kotlinx.android.synthetic.main.activity_main.toolbar
 import org.koin.core.KoinComponent
 
 const val SECURITY_ID = "SECURITY_ID"
 
 /**
- * TODO move everything out of here
+ * Detail screen where the current price vs the closing price is displayed
  */
 class DetailActivity : BaseActivity(), KoinComponent, DetailContract.View {
 
     private val LOG_TAG = this::class.java.simpleName
-
-    private lateinit var vRoot: View
-
-    private lateinit var tvClosingPrice: TextView
-    private lateinit var tvLatency: TextView
-
-    private lateinit var tvCurrentPrice: TextView
-    private lateinit var tvPercentage: TextView
-    private lateinit var ivArrow: ImageView
 
     private lateinit var presenter: DetailPresenter
 
@@ -38,14 +27,6 @@ class DetailActivity : BaseActivity(), KoinComponent, DetailContract.View {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
         setSupportActionBar(toolbar)
-
-        vRoot = findViewById(R.id.activity_detail_rootView)
-        tvClosingPrice = findViewById(R.id.activity_detail_closing_price)
-        tvLatency = findViewById(R.id.activity_detail_latency)
-
-        tvCurrentPrice = findViewById(R.id.activity_detail_currentPrice)
-        tvPercentage = findViewById(R.id.activity_detail_percentage)
-        ivArrow = findViewById(R.id.activity_detail_arrow)
 
         setPresenter(DetailPresenter(this))
     }
@@ -60,32 +41,32 @@ class DetailActivity : BaseActivity(), KoinComponent, DetailContract.View {
     }
 
     override fun setClosingPrice(price: String) {
-        tvClosingPrice.text = price
+        activity_detail_closing_price.text = price
     }
 
     override fun setCurrentPrice(price: String) {
-        tvCurrentPrice.text = price
+        activity_detail_currentPrice.text = price
     }
 
     override fun setArrowUp() {
-        ivArrow.setImageResource(R.drawable.ic_arrow_up)
+        activity_detail_arrow.setImageResource(R.drawable.ic_arrow_up)
     }
 
     override fun setArrowDown() {
-        ivArrow.setImageResource(R.drawable.ic_arrow_down)
+        activity_detail_arrow.setImageResource(R.drawable.ic_arrow_down)
     }
 
     override fun setPercentage(percentage: String) {
-        tvPercentage.text = percentage
+        activity_detail_percentage.text = percentage
     }
 
     override fun setLatency(latency: String, @ColorRes color: Int) {
-        tvLatency.text = latency
-        tvLatency.setTextColor(ContextCompat.getColor(this, color))
+        activity_detail_latency.text = latency
+        activity_detail_latency.setTextColor(ContextCompat.getColor(this, color))
     }
 
     override fun setError(message: String, duration: Int) {
-        val bar = Snackbar.make(vRoot, message, duration)
+        val bar = Snackbar.make(activity_detail_rootView, message, duration)
         bar.setAction(android.R.string.ok) {
             bar.dismiss()
         }
@@ -94,7 +75,7 @@ class DetailActivity : BaseActivity(), KoinComponent, DetailContract.View {
     }
 
     override fun setError(@StringRes message: Int, duration: Int) {
-        val bar = Snackbar.make(vRoot, message, duration)
+        val bar = Snackbar.make(activity_detail_rootView, message, duration)
         bar.setAction(android.R.string.ok) {
             bar.dismiss()
         }

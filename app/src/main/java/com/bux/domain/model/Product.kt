@@ -8,23 +8,7 @@ import androidx.room.PrimaryKey
 const val PERCENTAGE_FORMAT = "%.2f%%"
 
 /**
-{
-"symbol": "FRANCE40",
-"securityId": "26608",
-"displayName": "French Exchange",
-"currentPrice": {
-"currency": "EUR",
-"decimals": 1,
-"amount": "4371.8"
-},
-"closingPrice": {
-"currency": "EUR",
-"decimals": 1,
-"amount": "4216.4"
-}
-}
-
- *
+ * Product model
  */
 @Entity
 data class Product(
@@ -39,15 +23,17 @@ data class Product(
     val displayName: String,
 
     @Embedded(prefix = "current_")
-    var currentPrice: Price?, // TODO enable + make updatable
+    var currentPrice: Price?,
 
     @Embedded(prefix = "closing_")
     var closingPrice: Price?
 ) {
 
-
     /**
-     * Can be negative growth!
+     * Gives the growth between [currentPrice] and [closingPrice] in percentage. Can also result
+     * in negative growth.
+     *
+     * When either is unknown the growth is 0.0.
      */
     fun getGrowth(): Double {
         currentPrice?.let { new ->
@@ -59,6 +45,5 @@ data class Product(
 
         return 0.0
     }
-
 
 }

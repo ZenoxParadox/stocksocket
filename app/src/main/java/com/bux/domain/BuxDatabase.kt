@@ -7,7 +7,7 @@ import com.bux.domain.dao.ProductDao
 import com.bux.domain.model.Product
 
 /**
- * TODO Describe class functionality.
+ * Database configuration file
  */
 @Database(entities = [Product::class], version = 1)
 abstract class BuxDatabase : RoomDatabase(){

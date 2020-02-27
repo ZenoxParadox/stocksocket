@@ -1,7 +1,8 @@
 package com.bux.network.realtime
 
 /**
- * TODO Describe class functionality.
+ * Subscription object. When unsubscribing it will automatically make sure it will not be part
+ * of [subscribeTo].
  */
 data class Subscription(
     private val subscribeTo: MutableSet<String> = mutableSetOf(),

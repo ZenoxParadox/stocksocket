@@ -7,26 +7,8 @@ import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.Path
 
-/*
-
-TODO remove
-{
-  "refreshable": false,
-  "sub": "bb0cda2b-a10e-4ed3-ad5a-0f82b4c152c4",
-  "aud": "beta.getbux.com",
-  "scp": [
-    "app:login",
-    "rtf:login"
-  ],
-  "exp": 1820849279,
-  "iat": 1505489279,
-  "jti": "b739fb80-3575-4b01-8751-33d1a4dc8f92",
-  "cid": "8473622939"
-}
- */
-
 /**
- * TODO Describe class functionality.
+ * Rest api endpoints
  */
 interface RestApi {
 
