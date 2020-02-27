@@ -133,7 +133,7 @@ class DetailPresenterTest : BaseTest() {
 
             // basic rest calls
             presenter["requestFromRest"]
-            view.setDisplayName(any())
+            view.setDisplayName("example")
             view.setCurrentPrice(any())
             view.setClosingPrice(any())
             presenter.setProduct(testProduct)
@@ -143,7 +143,7 @@ class DetailPresenterTest : BaseTest() {
             view.setCurrentPrice("EUR1.291")
             view.setArrowUp()
             // view.setLatency(any(), any()) <-- ignore hardcoded time difference
-            view.setPercentage("29.65%")
+            view.setPercentage("14.94%")
             // view.setError(any(), any()) <-- ignore latency error
         }
     }
