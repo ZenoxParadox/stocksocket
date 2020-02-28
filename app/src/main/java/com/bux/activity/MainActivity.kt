@@ -11,12 +11,11 @@ import com.bux.presenter.MainPresenter
 import com.bux.presenter.contract.MainContract
 import kotlinx.android.synthetic.main.activity_detail.toolbar
 import kotlinx.android.synthetic.main.activity_main.*
-import org.koin.core.KoinComponent
 
 /**
  * First activity where a list is shown to the user
  */
-class MainActivity : BaseActivity(), KoinComponent, MainContract.View {
+class MainActivity : BaseActivity(), MainContract.View {
 
     private val LOG_TAG = this::class.java.simpleName
 

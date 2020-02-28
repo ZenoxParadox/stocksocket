@@ -6,20 +6,15 @@ import com.bux.network.rest.RestApi
 import com.bux.util.Logger
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import org.koin.core.KoinComponent
-import org.koin.core.inject
 import java.net.ConnectException
+import javax.inject.Inject
 
 /**
  * Basic [Product] repository between [RestApi] and [com.bux.domain.BuxDatabase]
  */
-class ProductRepository : KoinComponent {
+class ProductRepository @Inject constructor(private val api: RestApi, private val productDao: ProductDao) {
 
     private val LOG_TAG = this::class.java.simpleName
-
-    private val api: RestApi by inject()
-
-    private val productDao: ProductDao by inject()
 
     fun getAll(): Single<List<Product>> {
         return productDao.getAll().subscribeOn(Schedulers.io())

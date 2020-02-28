@@ -4,28 +4,24 @@ import com.bux.BuildConfig
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import org.koin.core.KoinComponent
-import org.koin.core.get
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
-
+import javax.inject.Inject
 
 /**
  * Network for REST calls.
  *
  * Custom error body is caught here and thrown as a new exception.
  */
-class Network : KoinComponent {
+class Network @Inject constructor(private val gson: Gson) {
 
     private val LOG_TAG = this::class.java.simpleName
-
-    private val gson: Gson = get()
 
     fun create(): RestApi {
 
         val interceptor = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = HttpLoggingInterceptor.Level.NONE
         }
 
         val client = OkHttpClient.Builder()

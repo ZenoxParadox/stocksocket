@@ -6,6 +6,8 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.bux.domain.dao.ProductDao
 import com.bux.domain.model.Product
 
+const val NAME = "Bux"
+
 /**
  * Database configuration file
  */

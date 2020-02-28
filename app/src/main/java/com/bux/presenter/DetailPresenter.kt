@@ -1,6 +1,7 @@
 package com.bux.presenter
 
 import android.os.Bundle
+import com.bux.Bux
 import com.bux.R
 import com.bux.activity.SECURITY_ID
 import com.bux.domain.model.PERCENTAGE_FORMAT
@@ -22,8 +23,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.exceptions.CompositeException
 import io.reactivex.schedulers.Schedulers
-import org.koin.core.KoinComponent
-import org.koin.core.inject
+import javax.inject.Inject
 import kotlin.math.abs
 
 
@@ -37,16 +37,21 @@ const val LATENCY_WARNING = 10_000
 /**
  * Presenter for product detail [com.bux.activity.DetailActivity]
  */
-class DetailPresenter(private val view: DetailContract.View) : DetailContract.Presenter,
-    KoinComponent {
+class DetailPresenter(private val view: DetailContract.View) : DetailContract.Presenter {
+
+    init {
+        Bux.dagger.inject(this)
+    }
 
     private val LOG_TAG = this::class.java.simpleName
 
-    private val socket: SocketApi by inject()
+    var socket: SocketApi = Socket().create()
 
-    private val gson: Gson by inject()
+    @Inject
+    lateinit var gson: Gson
 
-    private val repo: ProductRepository by inject()
+    @Inject
+    lateinit var repo: ProductRepository
 
     private val disposables = CompositeDisposable()
 
@@ -107,7 +112,7 @@ class DetailPresenter(private val view: DetailContract.View) : DetailContract.Pr
                     })
             )
 
-            disposables.add(openSocket().subscribe { event ->
+            disposables.add(openSocket().subscribe ({ event ->
                 Logger.i(LOG_TAG, "onEvent($event)")
 
                 when (event) {
@@ -128,7 +133,7 @@ class DetailPresenter(private val view: DetailContract.View) : DetailContract.Pr
                         socket.sendSubscription(subscriptions)
                     }
                 }
-            })
+            }, { error -> Logger.e(LOG_TAG, "error", error)}))
         }
     }
 
@@ -138,12 +143,15 @@ class DetailPresenter(private val view: DetailContract.View) : DetailContract.Pr
 
     private fun mainStream(): Flowable<Quote> {
         return socket.mainStream()
+            .doOnEach { Logger.toString(LOG_TAG, "mainstream event", it) }
             .filter { it.type == MessageType.QUOTE }
             .map { it.getQuote()!! }
     }
 
     private fun openSocket(): Flowable<WebSocket.Event> {
+        Logger.i(LOG_TAG, "openSocket()")
         return socket.eventStream()
+            .doOnEach { Logger.toString(LOG_TAG, "socket event", it) }
             .filter filter@{ event ->
 
                 if (event is WebSocket.Event.OnConnectionOpened<*> || event is WebSocket.Event.OnConnectionFailed) {

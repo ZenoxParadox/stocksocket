@@ -10,14 +10,13 @@ import com.bux.presenter.contract.DetailContract
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_detail.*
 import kotlinx.android.synthetic.main.activity_main.toolbar
-import org.koin.core.KoinComponent
 
 const val SECURITY_ID = "SECURITY_ID"
 
 /**
  * Detail screen where the current price vs the closing price is displayed
  */
-class DetailActivity : BaseActivity(), KoinComponent, DetailContract.View {
+class DetailActivity : BaseActivity(), DetailContract.View {
 
     private val LOG_TAG = this::class.java.simpleName
 
@@ -34,7 +33,6 @@ class DetailActivity : BaseActivity(), KoinComponent, DetailContract.View {
     override fun setPresenter(presenter: DetailContract.Presenter) {
         this.presenter = presenter as DetailPresenter
     }
-
 
     override fun setDisplayName(name: String) {
         toolbar.title = name

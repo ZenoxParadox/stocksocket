@@ -1,20 +1,25 @@
 package com.bux.presenter
 
 import android.os.Bundle
+import com.bux.Bux
 import com.bux.domain.model.Product
 import com.bux.network.repository.ProductRepository
 import com.bux.presenter.contract.MainContract
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import org.koin.core.KoinComponent
-import org.koin.core.inject
+import javax.inject.Inject
 
 /**
  * Presenter for product list [com.bux.activity.MainActivity]
  */
-class MainPresenter(private val view: MainContract.View) : MainContract.Presenter, KoinComponent {
+class MainPresenter(private val view: MainContract.View) : MainContract.Presenter {
 
-    private val repo : ProductRepository by inject()
+    init {
+        Bux.dagger.inject(this)
+    }
+
+    @Inject
+    lateinit var repo : ProductRepository
 
     private val disposables = CompositeDisposable()
 
