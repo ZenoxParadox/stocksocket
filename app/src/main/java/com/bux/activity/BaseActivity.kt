@@ -12,7 +12,7 @@ import androidx.core.content.ContextCompat
 import com.bux.R
 import com.bux.network.rest.BuxException
 import com.bux.network.rest.ErrorType
-import com.bux.network.rest.findOrThrow
+import com.bux.network.rest.findOrNull
 import com.bux.util.Logger
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -20,6 +20,7 @@ import io.reactivex.exceptions.CompositeException
 import io.reactivex.exceptions.OnErrorNotImplementedException
 import io.reactivex.plugins.RxJavaPlugins
 import java.net.ConnectException
+import java.net.SocketTimeoutException
 
 /**
  * Base activity
@@ -41,7 +42,11 @@ abstract class BaseActivity : AppCompatActivity() {
          * When not handled they can be considered crashes/bugs (firebase bug report for example)
          */
         RxJavaPlugins.setErrorHandler handler@{ error ->
+            Logger.block(LOG_TAG, "MAIN ERROR")
+
             if (error is OnErrorNotImplementedException) {
+                Logger.w(LOG_TAG, "cause: ${error.cause?.message}")
+
                 when (error.cause) {
                     is ConnectException -> {
                         Toast.makeText(this@BaseActivity, error.cause?.message, Toast.LENGTH_SHORT)
@@ -53,27 +58,41 @@ abstract class BaseActivity : AppCompatActivity() {
             }
 
             if (error is CompositeException) {
-                val buxError = findOrThrow<BuxException>(error)
-                Logger.e(LOG_TAG, "BuxError: ${buxError.hint}. (${buxError.code})")
+                findOrNull<BuxException>(error)?.let { buxError ->
+                    Logger.w(LOG_TAG, "BuxError: ${buxError.hint}. (${buxError.code})")
 
-                when (buxError.code) {
-                    ErrorType.ACCESS_PERMISSION, ErrorType.EXPIRED, ErrorType.AUTH_HEADER -> {
-                        finish()
-                        return@handler
-                    }
-                    ErrorType.INVALIDTOKEN -> {
-                        showIssue(buxError.code.text, Toast.LENGTH_SHORT)
-                        finish()
-                        return@handler
-                    }
-                    ErrorType.UNEXPECTED -> {
-                        showIssue(buxError.code.text, Toast.LENGTH_SHORT)
+                    when (buxError.code) {
+                        ErrorType.ACCESS_PERMISSION, ErrorType.EXPIRED, ErrorType.AUTH_HEADER -> {
+                            finish()
+                            return@handler
+                        }
+                        ErrorType.INVALIDTOKEN -> {
+                            showIssue(buxError.code.text, Toast.LENGTH_SHORT)
+                            finish()
+                            return@handler
+                        }
+                        ErrorType.UNEXPECTED -> {
+                            showIssue(buxError.code.text, Toast.LENGTH_SHORT)
+                        }
                     }
                 }
+
+                findOrNull<SocketTimeoutException>(error)?.let { socketError ->
+                    Logger.w(LOG_TAG, "Socket error: ${socketError.message}")
+
+                    var message = "Connection error"
+                    socketError.message?.let {
+                        message = it
+                    }
+
+                    showError(message, Snackbar.LENGTH_SHORT)
+                    return@handler
+                }
+
             }
 
             // If the exception still hasn't been handled, rethrow it.
-            Logger.e(LOG_TAG, "Undeliverable exception received. No action specified", error)
+            Logger.block(LOG_TAG, "Undeliverable exception received. No action specified")
             throw error
         }
     }
@@ -100,13 +119,21 @@ abstract class BaseActivity : AppCompatActivity() {
     /**
      * Used in case the user needs to acknowledge the message
      */
-    private fun showError(text: Int, @BaseTransientBottomBar.Duration duration: Int) {
+    private fun showError(text: String, @BaseTransientBottomBar.Duration duration: Int) {
         val bar = Snackbar.make(window.decorView, text, duration)
         bar.setAction(android.R.string.ok) {
             bar.dismiss()
         }
         bar.view.setBackgroundColor(ContextCompat.getColor(bar.view.context, R.color.king_red))
         bar.show()
+    }
+
+    /**
+     * Used in case the user needs to acknowledge the message
+     */
+    private fun showError(text: Int, @BaseTransientBottomBar.Duration duration: Int) {
+        val stringText = getString(text)
+        showError(stringText, duration)
     }
 
 }

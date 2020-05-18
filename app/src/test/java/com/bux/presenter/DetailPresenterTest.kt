@@ -13,14 +13,13 @@ import com.bux.network.repository.ProductRepository
 import com.bux.presenter.contract.DetailContract
 import com.google.gson.JsonParser
 import com.tinder.scarlet.Message
-import com.tinder.scarlet.WebSocket
+import com.tinder.scarlet.websocket.WebSocketEvent
 import io.mockk.*
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import io.reactivex.Single
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.koin.test.mock.declareMock
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.util.*
@@ -56,7 +55,7 @@ class DetailPresenterTest : BaseTest() {
     fun `a2 - should show the name of the product`() {
         val presenter = DetailPresenter(view)
 
-        declareMock<ProductRepository> {
+        mockk<ProductRepository>(){
             every {
                 getSingle(testProduct.securityId)
             } answers {
@@ -90,7 +89,7 @@ class DetailPresenterTest : BaseTest() {
          */
         val BODY_QUOTE = "{ \"securityId\": \"sb26502\", \"currentPrice\": 1.29079, \"timeStamp\": 1582231088710 }"
 
-        declareMock<ProductRepository> {
+        mockk<ProductRepository> {
             every {
                 getSingle(testProduct.securityId)
             } answers {
@@ -98,11 +97,11 @@ class DetailPresenterTest : BaseTest() {
             }
         }
 
-        declareMock<SocketApi> {
+        mockk<SocketApi> {
             every {
                 eventStream()
             } answers {
-                val firstEvent = WebSocket.Event.OnMessageReceived(Message.Text(BODY_CONNECTED))
+                val firstEvent = WebSocketEvent.OnMessageReceived(Message.Text(BODY_CONNECTED))
                 Flowable.just(firstEvent)
             }
 

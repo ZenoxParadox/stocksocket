@@ -6,7 +6,10 @@ import com.bux.R
 import com.bux.activity.SECURITY_ID
 import com.bux.domain.model.PERCENTAGE_FORMAT
 import com.bux.domain.model.Product
-import com.bux.network.realtime.*
+import com.bux.network.realtime.BuxMessage
+import com.bux.network.realtime.MessageType
+import com.bux.network.realtime.SocketApi
+import com.bux.network.realtime.Subscription
 import com.bux.network.repository.ProductRepository
 import com.bux.network.rest.BuxException
 import com.bux.network.rest.ErrorType
@@ -16,16 +19,13 @@ import com.bux.util.Logger
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.tinder.scarlet.Message
-import com.tinder.scarlet.WebSocket
-import io.reactivex.Flowable
-import io.reactivex.Single
+import com.tinder.scarlet.websocket.WebSocketEvent
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.exceptions.CompositeException
 import io.reactivex.schedulers.Schedulers
+import java.lang.Math.abs
 import javax.inject.Inject
-import kotlin.math.abs
-
 
 /**
  * NOTE: I've observed that a plain [okhttp3.WebSocket] socket connection between 200-300ms on average.
@@ -45,7 +45,8 @@ class DetailPresenter(private val view: DetailContract.View) : DetailContract.Pr
 
     private val LOG_TAG = this::class.java.simpleName
 
-    var socket: SocketApi = Socket().create()
+    @Inject
+    lateinit var socket: SocketApi
 
     @Inject
     lateinit var gson: Gson
@@ -63,10 +64,59 @@ class DetailPresenter(private val view: DetailContract.View) : DetailContract.Pr
         Logger.i(LOG_TAG, "start($bundle)")
 
         bundle?.getString(SECURITY_ID)?.let { securityId ->
+
+            // Set the securityId to subscribe to
             subscriptions.subscribe(securityId)
 
             disposables.add(
-                requestFromRest(securityId)
+                socket.eventStream()
+                    .subscribeOn(Schedulers.io())
+                    .doOnEach { Logger.toString(LOG_TAG, "socket event", it) }
+                    .filter filter@{ event ->
+
+                        if (event is WebSocketEvent.OnConnectionOpened) {
+                            return@filter false
+                        }
+
+                        if (event is WebSocketEvent.OnConnectionFailed) {
+                            return@filter true
+                        }
+
+                        if (event is WebSocketEvent.OnMessageReceived) {
+                            val textMessage = event.message as Message.Text
+                            val container = gson.fromJson(textMessage.value, BuxMessage::class.java)
+                            if (container.type == MessageType.CONNECTED) {
+                                Logger.block(LOG_TAG, "connected")
+                                return@filter true
+                            }
+                        }
+
+                        return@filter false
+                    }
+                    .subscribe({ event ->
+                        Logger.i(LOG_TAG, "onEvent($event)")
+
+                        when (event) {
+                            is WebSocketEvent.OnConnectionFailed -> {
+                                Logger.e(LOG_TAG, "onFailure(${event.throwable.message})")
+
+                                var message = "Error, check your connection"
+                                event.throwable.localizedMessage?.let { errorMessage ->
+                                    message = errorMessage
+                                }
+
+                                view.setError(message, Snackbar.LENGTH_LONG)
+                            }
+                            is WebSocketEvent.OnMessageReceived -> {
+                                Logger.v(LOG_TAG, "sending subscriptions: $subscriptions")
+                                socket.sendSubscription(subscriptions)
+                            }
+                        }
+                    }, { error -> Logger.e(LOG_TAG, "error", error) })
+            )
+
+            disposables.add(
+                repo.getSingle(securityId)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe({ product ->
@@ -99,9 +149,7 @@ class DetailPresenter(private val view: DetailContract.View) : DetailContract.Pr
                                 ErrorType.EXPIRED -> {
                                     view.setError(buxError.code.text, Snackbar.LENGTH_LONG)
                                 }
-                                else -> {
-                                    throw buxError
-                                }
+                                else -> throw buxError
                             }
 
                             return@subscribe
@@ -112,62 +160,8 @@ class DetailPresenter(private val view: DetailContract.View) : DetailContract.Pr
                     })
             )
 
-            disposables.add(openSocket().subscribe ({ event ->
-                Logger.i(LOG_TAG, "onEvent($event)")
 
-                when (event) {
-                    is WebSocket.Event.OnConnectionOpened<*> -> {
-                        Logger.i(LOG_TAG, "socket connection opened.")
-                    }
-                    is WebSocket.Event.OnConnectionFailed -> {
-                        Logger.e(LOG_TAG, "onFailure(${event.throwable.message})")
-
-                        var message = "Error, check your connection"
-                        event.throwable.localizedMessage?.let { errorMessage ->
-                            message = errorMessage
-                        }
-
-                        view.setError(message, Snackbar.LENGTH_LONG)
-                    }
-                    is WebSocket.Event.OnMessageReceived -> {
-                        socket.sendSubscription(subscriptions)
-                    }
-                }
-            }, { error -> Logger.e(LOG_TAG, "error", error)}))
         }
-    }
-
-    private fun requestFromRest(id: String): Single<Product> {
-        return repo.getSingle(id)
-    }
-
-    private fun mainStream(): Flowable<Quote> {
-        return socket.mainStream()
-            .doOnEach { Logger.toString(LOG_TAG, "mainstream event", it) }
-            .filter { it.type == MessageType.QUOTE }
-            .map { it.getQuote()!! }
-    }
-
-    private fun openSocket(): Flowable<WebSocket.Event> {
-        Logger.i(LOG_TAG, "openSocket()")
-        return socket.eventStream()
-            .doOnEach { Logger.toString(LOG_TAG, "socket event", it) }
-            .filter filter@{ event ->
-
-                if (event is WebSocket.Event.OnConnectionOpened<*> || event is WebSocket.Event.OnConnectionFailed) {
-                    return@filter false
-                }
-
-                if (event is WebSocket.Event.OnMessageReceived) {
-                    val textMessage = event.message as Message.Text
-                    val container = gson.fromJson(textMessage.value, BuxMessage::class.java)
-                    if (container.type == MessageType.CONNECTED) {
-                        return@filter true
-                    }
-                }
-
-                return@filter false
-            }
     }
 
     override fun pause() {
@@ -181,41 +175,45 @@ class DetailPresenter(private val view: DetailContract.View) : DetailContract.Pr
     override fun setProduct(product: Product) {
         this.product = product
 
-        disposables.add(mainStream()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { message ->
-                this.product.currentPrice?.amount = message.currentPrice
+        disposables.add(
+            socket.mainStream()
+                .doOnEach { Logger.toString(LOG_TAG, "mainstream event", it) }
+                .filter { it.type == MessageType.QUOTE }
+                .map { it.getQuote()!! }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { message ->
+                    this.product.currentPrice?.amount = message.currentPrice
 
-                product.currentPrice?.let { current ->
-                    view.setCurrentPrice(current.asCurrency(message.currentPrice))
-                }
+                    product.currentPrice?.let { current ->
+                        view.setCurrentPrice(current.asCurrency(message.currentPrice))
+                    }
 
-                // Current price and growth vs closing price
-                val growth = this.product.getGrowth()
-                if (growth > 0) {
-                    view.setArrowUp()
-                } else {
-                    view.setArrowDown()
-                }
+                    // Current price and growth vs closing price
+                    val growth = this.product.getGrowth()
+                    if (growth > 0) {
+                        view.setArrowUp()
+                    } else {
+                        view.setArrowDown()
+                    }
 
-                val growthFormatted = String.format(PERCENTAGE_FORMAT, abs(growth))
-                view.setPercentage(growthFormatted)
+                    val growthFormatted = String.format(PERCENTAGE_FORMAT, abs(growth))
+                    view.setPercentage(growthFormatted)
 
-                // latency check
-                val latency = System.currentTimeMillis() - message.timeStamp
-                var color: Int = R.color.jazz_green
-                if (latency > LATENCY_OK) {
-                    color = R.color.king_red
-                }
+                    // latency check
+                    val latency = System.currentTimeMillis() - message.timeStamp
+                    var color: Int = R.color.jazz_green
+                    if (latency > LATENCY_OK) {
+                        color = R.color.king_red
+                    }
 
-                view.setLatency("$latency", color)
+                    view.setLatency("$latency", color)
 
-                // Warn user if the latency is very high
-                if (latency > LATENCY_WARNING) {
-                    view.setError(R.string.poor_connection, Snackbar.LENGTH_SHORT)
-                }
-            })
+                    // Warn user if the latency is very high
+                    if (latency > LATENCY_WARNING) {
+                        view.setError(R.string.poor_connection, Snackbar.LENGTH_SHORT)
+                    }
+                })
     }
 
     override fun stop() {

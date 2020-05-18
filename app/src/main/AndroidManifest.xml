@@ -29,6 +29,8 @@
         <activity
             android:name=".activity.DetailActivity"
             android:parentActivityName=".activity.MainActivity" />
+        <activity android:name=".activity.ScarletActivity" />
+        <activity android:name=".activity.PlainActivity" />
 
     </application>
 

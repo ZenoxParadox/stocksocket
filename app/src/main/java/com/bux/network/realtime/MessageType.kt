@@ -13,6 +13,4 @@ enum class MessageType {
     @SerializedName("trading.quote")
     QUOTE,
 
-    NONE
-
 }

@@ -16,6 +16,10 @@ class ProductRepository @Inject constructor(private val api: RestApi, private va
 
     private val LOG_TAG = this::class.java.simpleName
 
+    init {
+        Logger.addIgnoreTag(LOG_TAG)
+    }
+
     fun getAll(): Single<List<Product>> {
         return productDao.getAll().subscribeOn(Schedulers.io())
     }

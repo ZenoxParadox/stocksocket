@@ -11,18 +11,18 @@ import com.google.gson.annotations.SerializedName
 data class BuxMessage(
 
     @SerializedName("t")
-    val type: MessageType = MessageType.NONE,
+    val type: MessageType?,
 
     val body: JsonElement
 
 ) {
 
-    fun getQuote(): Quote? {
+    fun getQuote(): Quote {
         if (type == MessageType.QUOTE) {
             return Gson().fromJson(body, Quote::class.java)
         }
 
-        return null
+        throw IllegalStateException("Empty quote body")
     }
 
     fun getConnected(): Connected? {

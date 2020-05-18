@@ -26,6 +26,8 @@ import javax.inject.Singleton
 @Module
 class AppModule(private val app: Application) {
 
+    private val LOG_TAG = this::class.java.simpleName
+
     @Provides
     @Singleton
     @Named("appContext")
@@ -33,21 +35,14 @@ class AppModule(private val app: Application) {
 
     @Provides
     @Singleton
-    fun provideRestApi(gson: Gson): RestApi {
-        return Network(gson).create()
-    }
+    fun provideRestApi(gson: Gson): RestApi = Network(gson).create()
+
+    @Provides
+    fun provideSocketApi(): SocketApi = Socket().create()
 
     @Provides
     @Singleton
-    fun provideSocketApi(): SocketApi {
-        return Socket().create()
-    }
-
-    @Provides
-    @Singleton
-    fun provideGson(): Gson {
-        return GsonBuilder().create()
-    }
+    fun provideGson(): Gson = GsonBuilder().create()
 
     @Provides
     @Singleton
@@ -61,9 +56,7 @@ class AppModule(private val app: Application) {
 
     @Provides
     @Singleton
-    fun provideProductDao(db: BuxDatabase): ProductDao {
-        return db.productDao()
-    }
+    fun provideProductDao(db: BuxDatabase): ProductDao = db.productDao()
 
     /* ********** [ objects ] ********** */
 

@@ -33,6 +33,7 @@ class MainPresenter(private val view: MainContract.View) : MainContract.Presente
         view.showDetail(item)
     }
 
+
     override fun stop() {
         disposables.clear()
     }

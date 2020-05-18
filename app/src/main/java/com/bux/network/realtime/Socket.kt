@@ -1,12 +1,15 @@
 package com.bux.network.realtime
 
 import com.bux.BuildConfig
+import com.bux.util.Logger
 import com.tinder.scarlet.Scarlet
 import com.tinder.scarlet.messageadapter.gson.GsonMessageAdapter
 import com.tinder.scarlet.retry.ExponentialBackoffStrategy
 import com.tinder.scarlet.streamadapter.rxjava2.RxJava2StreamAdapterFactory
-import com.tinder.scarlet.websocket.okhttp.newWebSocketFactory
+import com.tinder.scarlet.websocket.ShutdownReason
+import com.tinder.scarlet.websocket.okhttp.OkHttpWebSocket
 import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
 
@@ -18,13 +21,20 @@ class Socket {
     private val LOG_TAG = this::class.java.simpleName
 
     fun create(): SocketApi {
+        Logger.i(LOG_TAG, "create")
+
         val interceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
         val client = OkHttpClient.Builder()
+            .callTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(5, TimeUnit.SECONDS)
+            .writeTimeout(5, TimeUnit.SECONDS)
             .addInterceptor(interceptor)
             .addInterceptor intercept@{ chain ->
+                Logger.i(LOG_TAG, "socket intercept")
+
                 val original = chain.request()
                 val builder = original.newBuilder()
 
@@ -38,19 +48,25 @@ class Socket {
             }
             .build()
 
-        val scarlet = Scarlet.Builder()
-            .webSocketFactory(client.newWebSocketFactory("${BuildConfig.API_BASE}/subscriptions/me"))
-            .addMessageAdapterFactory(GsonMessageAdapter.Factory())
-            .addStreamAdapterFactory(RxJava2StreamAdapterFactory())
-            .backoffStrategy(
-                ExponentialBackoffStrategy(
-                    initialDurationMillis = TimeUnit.SECONDS.toMillis(5),
-                    maxDurationMillis = TimeUnit.MINUTES.toMillis(2)
-                )
+        val protocol = OkHttpWebSocket(
+            client,
+            OkHttpWebSocket.SimpleRequestFactory(
+                { Request.Builder().url("${BuildConfig.API_BASE}/subscriptions/me").build() },
+                { ShutdownReason.GRACEFUL }
             )
-            .build()
+        )
 
-        return scarlet.create<SocketApi>(SocketApi::class.java)
+        val configuration = Scarlet.Configuration(
+            messageAdapterFactories = listOf(GsonMessageAdapter.Factory()),
+            streamAdapterFactories = listOf(RxJava2StreamAdapterFactory()),
+            backoffStrategy =                 ExponentialBackoffStrategy(
+                initialDurationMillis = TimeUnit.SECONDS.toMillis(5),
+                maxDurationMillis = TimeUnit.MINUTES.toMillis(2)
+            )
+        )
+
+        val scarletInstance = Scarlet(protocol, configuration)
+        return scarletInstance.create()
     }
 
 }
